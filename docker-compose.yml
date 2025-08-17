@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: escola_api
+    command: sh -c "npx prisma generate && npm run start:dev"
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: mysql://user:123456@db:3306/escola
+      DB_NAME: escola
+      DB_PASSWORD: 123456
+      DB_USER: user
+      PORT: 3333
+    ports:
+      - "3333:3333"
+    restart: always
+    volumes:
+      - .:/app
+      - /app/node_modules
+    working_dir: /app
+
+  db:
+    image: mysql:8.0
+    container_name: escola_db
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: escola
+      MYSQL_USER: user
+      MYSQL_PASSWORD: 123456
+    ports:
+      - "3306:3306"
+    restart: always
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 10s
+      retries: 15
+    volumes:
+      - db_data:/var/lib/mysql
+
+volumes:
+  db_data:

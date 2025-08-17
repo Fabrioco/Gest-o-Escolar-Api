@@ -1,0 +1,87 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id         String    @id @default(uuid())
+  name       String
+  email      String    @unique
+  password   String
+  role       Role
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  student    Student?   @relation("UserStudent")
+  teacher    Teacher?   @relation("UserTeacher")
+  responsible Responsible? @relation("UserResponsible")
+}
+
+model Student {
+  id         String    @id @default(uuid())
+  userId     String    @unique
+  user       User      @relation(fields: [userId], references: [id], name: "UserStudent")
+  classId    String?
+  class      SchoolClass? @relation(fields: [classId], references: [id])
+  grades     Grade[]
+  responsibleLinks ResponsibleStudent[]
+}
+
+model Teacher {
+  id         String    @id @default(uuid())
+  userId     String    @unique
+  user       User      @relation(fields: [userId], references: [id], name: "UserTeacher")
+  classes    SchoolClass[]
+}
+
+model Responsible {
+  id         String    @id @default(uuid())
+  userId     String    @unique
+  user       User      @relation(fields: [userId], references: [id], name: "UserResponsible")
+  students   ResponsibleStudent[]
+}
+
+model ResponsibleStudent {
+  id           String   @id @default(uuid())
+  responsibleId String
+  studentId    String
+
+  responsible  Responsible @relation(fields: [responsibleId], references: [id])
+  student      Student     @relation(fields: [studentId], references: [id])
+
+  @@unique([responsibleId, studentId])
+}
+
+model SchoolClass {
+  id          String    @id @default(uuid())
+  name        String
+  year        Int?
+  teacherId   String
+  teacher     Teacher   @relation(fields: [teacherId], references: [id])
+  students    Student[]
+}
+
+model Grade {
+  id         String    @id @default(uuid())
+  value      Float
+  subject    String
+  studentId  String
+  student    Student   @relation(fields: [studentId], references: [id])
+}
+
+enum Role {
+  ADMIN
+  TEACHER
+  STUDENT
+  RESPONSIBLE
+}
