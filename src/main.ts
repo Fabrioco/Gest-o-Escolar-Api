@@ -1,7 +1,7 @@
 import { NestFactory } from '@nestjs/core';
-import { AppModule } from './app.module';
 import { PrismaClient } from '@prisma/client';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { AppModule } from './app.module';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -28,7 +28,6 @@ function setupSwagger(app: any) {
       .setTitle('Escola API')
       .setDescription('API para gerenciamento de uma escola')
       .setVersion('1.0')
-      .addTag('escola')
       .build();
     const document = SwaggerModule.createDocument(app, config);
     SwaggerModule.setup('docs', app, document);
