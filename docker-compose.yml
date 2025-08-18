@@ -6,7 +6,7 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name: escola_api
-    command: sh -c "npx prisma generate && npm run start:dev"
+    command: sh -c "npx prisma generate && npx prisma db push && npm run start:dev"
     depends_on:
       db:
         condition: service_healthy
